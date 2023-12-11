@@ -13,21 +13,39 @@ const position = {
 
 function Map() {
   const searchBoxRef = useRef(null);
+  const mapRef = useRef(null);
 
-  const handleLoad = (searchBox) => {
+  const handleLoad = (searchBox, map) => {
     searchBoxRef.current = searchBox;
+    mapRef.current = map;
   };
 
   const handlePlacesChanged = () => {
     if (searchBoxRef.current) {
       const places = searchBoxRef.current.getPlaces();
+      console.log(searchBoxRef.current.getPlaces());
       if (places.length > 0) {
+        // 選択された場所の情報
+        const selectedPlace = places[0];
+
+        // 場所の名前
+        const placeName = selectedPlace.name;
+        console.log('場所の名前:', placeName);
+
+        // 緯度と経度
+        const latitude = selectedPlace.geometry.location.lat();
+        const longitude = selectedPlace.geometry.location.lng();
+        console.log('緯度:', latitude);
+        console.log('経度:', longitude);
+
+        // マップを新しい中心に移動
         const newCenter = {
-          lat: places[0].geometry.location.lat(),
-          lng: places[0].geometry.location.lng()
+          lat: latitude,
+          lng: longitude
         };
-        // Update the map center to the selected place
-        // Optionally, you may want to update other components or state based on the selected place
+        if (mapRef.current) {
+          mapRef.current.panTo(newCenter);
+        }
       }
     }
   };
