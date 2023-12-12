@@ -1,24 +1,48 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { GoogleMap, LoadScript } from '@react-google-maps/api';
+import { GoogleMap, LoadScript, Marker } from '@react-google-maps/api';
 import SearchBox from './StandaloneSearchBox ';
 import MapMarker from './MapMarker';
 
-const container = {
-  width: "100%",
-  height: "100vh"
-};
-
 const libraries = ['places'];
-
-const initialPosition = {  // 初期位置を定義
-  lat: 35.680959106959,
-  lng: 139.76730676352
-};
 
 function Map() {
   const searchBoxRef = useRef(null);
-  const [center, setCenter] = useState(initialPosition); 
+  const mapRef = useRef(null);
+  const [center, setCenter] = useState(null); 
   const [selectedPlace, setSelectedPlace] = useState(null);
+
+  const getUserLocation = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const userLatLng = {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+          };
+          setCenter(userLatLng); // ユーザーの位置でcenterステートを更新
+
+          if (mapRef.current) {
+            mapRef.current.panTo(userLatLng);
+            mapRef.current.setZoom(15);
+          }
+        },
+        (error) => {
+          console.error('Error getting user location:', error);
+        }
+      );
+    } else {
+      console.error('Geolocation is not supported by this browser.');
+    }
+  };
+
+  const handleUpdateCenter = () => {
+    getUserLocation();
+  };
+
+  // コンポーネントがマウントされた時にユーザーの位置を取得
+  useEffect(() => {
+    getUserLocation();
+  }, []);
 
   const handleLoad = (searchBox, map) => {
     searchBoxRef.current = searchBox;
@@ -46,17 +70,23 @@ function Map() {
   return (
     <>
       <h1>React & Google Map</h1>
-      <div className='wrap'>
+      <div className='wrap' style={{ position: 'relative' }}>
         <LoadScript googleMapsApiKey='AIzaSyDdBqvRgX8FtQI1CSFntBAnjWYW3tXUnyc' libraries={libraries}>
-          <GoogleMap mapContainerStyle={container} center={center} zoom={15}>
+          <GoogleMap mapContainerStyle={{ width: "100%", height: "100vh" }} center={center} zoom={15} onLoad={(map) => (mapRef.current = map)}>
             {/* StandaloneSearchBox */}
-            <SearchBox onLoad={handleLoad} onPlacesChanged={handlePlacesChanged} />
+            <SearchBox onLoad={handleLoad} onPlacesChanged={handlePlacesChanged}/>
 
-            {/* MapMarker */}
+            {/* MapMarker for selected place */}
             {selectedPlace && (
               <MapMarker position={selectedPlace.geometry.location} label={selectedPlace.name} />
             )}
-            
+
+            {/* Marker for user's current location */}
+            {center !== null && (
+            <Marker position={center} icon={{ path: window.google.maps.SymbolPath.CIRCLE, scale: 8 }} />
+          )}
+            {/* Button to update center to user's location */}
+            <button onClick={handleUpdateCenter} style={{ position: 'absolute', top: 10, left: 10, zIndex: 2 }}>現在地を取得</button>
           </GoogleMap>
         </LoadScript>
       </div>
