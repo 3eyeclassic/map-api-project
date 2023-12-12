@@ -19,37 +19,30 @@ function Map() {
   const searchBoxRef = useRef(null);
   const mapRef = useRef(null);
 
-  useEffect(() => {
-    // Google マップ API の読み込みが完了した後に実行されるコード
-    if (mapRef.current) {
-      // デバッグ情報を表示
-      console.log('mapRef:', mapRef.current);
-    }
-  }, [mapRef]); // mapRef が変更された場合に再実行
-
   const [selectedPlace, setSelectedPlace] = useState(null);
 
-  const handleLoad = (searchBox) => {
+  const handleLoad = (searchBox, map) => {
     searchBoxRef.current = searchBox;
+    mapRef.current = map;
   };
 
   const handlePlacesChanged = () => {
     if (searchBoxRef.current) {
       const places = searchBoxRef.current.getPlaces();
+
+      // Places 配列をコンソール上に表示
+      console.log('Places:', places);
       
       if (places && places.length > 0) {
-        // 選択された場所の情報
         const selectedPlace = places[0];
         setSelectedPlace(selectedPlace);
 
-        // 緯度と経度
         const latitude = selectedPlace.geometry.location.lat();
         const longitude = selectedPlace.geometry.location.lng();
 
-        // マップを新しい中心に移動
         const newCenter = {
           lat: latitude,
-          lng: longitude
+          lng: longitude,
         };
 
         if (mapRef.current) {
@@ -67,6 +60,11 @@ function Map() {
           <GoogleMap mapContainerStyle={container} center={position} zoom={15} ref={mapRef}>
             {/* StandaloneSearchBox */}
             <SearchBox onLoad={handleLoad} onPlacesChanged={handlePlacesChanged} />
+
+            {/* MapMarker */}
+            {selectedPlace && (
+              <MapMarker position={selectedPlace.geometry.location} label={selectedPlace.name} />
+            )}
             
           </GoogleMap>
         </LoadScript>

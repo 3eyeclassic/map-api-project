@@ -4,6 +4,13 @@ import { StandaloneSearchBox } from '@react-google-maps/api';
 const SearchBox = ({ onLoad, onPlacesChanged }) => {
     const searchBoxRef = useRef(null);
 
+    const handleLoad = (searchBox) => {
+        searchBoxRef.current = searchBox;
+        if (onLoad) {
+            onLoad(searchBox);
+        }
+    };
+
     useEffect(() => {
         if (searchBoxRef.current) {
           onLoad(searchBoxRef.current);
@@ -12,8 +19,8 @@ const SearchBox = ({ onLoad, onPlacesChanged }) => {
 
     return (
         <StandaloneSearchBox
-          onLoad={(ref) => (searchBoxRef.current = ref)}
-          onPlacesChanged={onPlacesChanged}>
+            onLoad={handleLoad}
+            onPlacesChanged={onPlacesChanged}>
 
             <input
             type="text"
