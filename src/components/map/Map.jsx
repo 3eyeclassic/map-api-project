@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useEffect,useRef } from 'react';
 import { GoogleMap, LoadScript, MarkerF, StandaloneSearchBox } from '@react-google-maps/api';
 
 const container = {
@@ -15,6 +15,14 @@ function Map() {
   const searchBoxRef = useRef(null);
   const mapRef = useRef(null);
 
+  useEffect(() => {
+    // Google マップ API の読み込みが完了した後に実行されるコード
+    if (mapRef.current) {
+      // デバッグ情報を表示
+      console.log('mapRef:', mapRef.current);
+    }
+  }, [mapRef]); // mapRef が変更された場合に再実行
+
   const handleLoad = (searchBox, map) => {
     searchBoxRef.current = searchBox;
     mapRef.current = map;
@@ -23,8 +31,11 @@ function Map() {
   const handlePlacesChanged = () => {
     if (searchBoxRef.current) {
       const places = searchBoxRef.current.getPlaces();
-      console.log(searchBoxRef.current.getPlaces());
-      if (places.length > 0) {
+      
+      // デバッグ情報を表示
+      console.log('places:', places);
+
+      if (places && places.length > 0) {
         // 選択された場所の情報
         const selectedPlace = places[0];
 
@@ -43,6 +54,10 @@ function Map() {
           lat: latitude,
           lng: longitude
         };
+
+        // デバッグ情報を表示
+        console.log('newCenter:', newCenter);
+
         if (mapRef.current) {
           mapRef.current.panTo(newCenter);
         }
@@ -56,7 +71,7 @@ function Map() {
       <div className='wrap'>
         <LoadScript googleMapsApiKey='AIzaSyDdBqvRgX8FtQI1CSFntBAnjWYW3tXUnyc'
                     libraries={['places']}>
-          <GoogleMap mapContainerStyle={container} center={position} zoom={15}>
+          <GoogleMap mapContainerStyle={container} center={position} zoom={15} ref={mapRef}>
             {/* StandaloneSearchBox */}
             <StandaloneSearchBox
               onLoad={handleLoad}
