@@ -4,33 +4,30 @@ import SearchBox from './StandaloneSearchBox ';
 import MapMarker from './MapMarker';
 
 const container = {
-  width: "75%",
-  height: "500px"
-};
-
-const position = {
-  lat: 35.680959106959,
-  lng: 139.76730676352
+  width: "100%",
+  height: "100vh"
 };
 
 const libraries = ['places'];
 
+const initialPosition = {  // 初期位置を定義
+  lat: 35.680959106959,
+  lng: 139.76730676352
+};
+
 function Map() {
   const searchBoxRef = useRef(null);
-  const mapRef = useRef(null);
-
+  const [center, setCenter] = useState(initialPosition); 
   const [selectedPlace, setSelectedPlace] = useState(null);
 
   const handleLoad = (searchBox, map) => {
     searchBoxRef.current = searchBox;
-    mapRef.current = map;
   };
 
   const handlePlacesChanged = () => {
     if (searchBoxRef.current) {
       const places = searchBoxRef.current.getPlaces();
 
-      // Places 配列をコンソール上に表示
       console.log('Places:', places);
       
       if (places && places.length > 0) {
@@ -40,14 +37,8 @@ function Map() {
         const latitude = selectedPlace.geometry.location.lat();
         const longitude = selectedPlace.geometry.location.lng();
 
-        const newCenter = {
-          lat: latitude,
-          lng: longitude,
-        };
-
-        if (mapRef.current) {
-          mapRef.current.panTo(newCenter);
-        }
+        // 中心位置を更新し、再描画をトリガー
+        setCenter({ lat: latitude, lng: longitude });
       }
     }
   };
@@ -57,7 +48,7 @@ function Map() {
       <h1>React & Google Map</h1>
       <div className='wrap'>
         <LoadScript googleMapsApiKey='AIzaSyDdBqvRgX8FtQI1CSFntBAnjWYW3tXUnyc' libraries={libraries}>
-          <GoogleMap mapContainerStyle={container} center={position} zoom={15} ref={mapRef}>
+          <GoogleMap mapContainerStyle={container} center={center} zoom={15}>
             {/* StandaloneSearchBox */}
             <SearchBox onLoad={handleLoad} onPlacesChanged={handlePlacesChanged} />
 
