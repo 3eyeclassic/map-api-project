@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { GoogleMap, LoadScript, Marker } from '@react-google-maps/api';
 import SearchBox from './StandaloneSearchBox ';
 import MapMarker from './MapMarker';
+import InfoWindow from './InfoWindow';
+import ClickedLocationInfoWindow from './ClickedLocationInfoWindow';
 
 const libraries = ['places'];
 
@@ -67,26 +69,56 @@ function Map() {
     }
   };
 
+  const handleInfoWindowClose = () => {
+    setSelectedPlace(null);
+  };
+
   return (
     <>
-      <h1>React & Google Map</h1>
       <div className='wrap' style={{ position: 'relative' }}>
-        <LoadScript googleMapsApiKey='AIzaSyDdBqvRgX8FtQI1CSFntBAnjWYW3tXUnyc' libraries={libraries}>
-          <GoogleMap mapContainerStyle={{ width: "100%", height: "100vh" }} center={center} zoom={15} onLoad={(map) => (mapRef.current = map)}>
+        <LoadScript 
+          googleMapsApiKey='AIzaSyDdBqvRgX8FtQI1CSFntBAnjWYW3tXUnyc' 
+          libraries={libraries}
+        >
+          <GoogleMap 
+            mapContainerStyle={{ width: "100%", height: "100vh" }} 
+            center={center} 
+            zoom={15} 
+            onLoad={(map) => (mapRef.current = map)}
+          >
             {/* StandaloneSearchBox */}
             <SearchBox onLoad={handleLoad} onPlacesChanged={handlePlacesChanged}/>
 
+            {selectedPlace && (
+              <InfoWindow
+                selectedPlace={selectedPlace}
+                onCloseClick={() => setSelectedPlace(null)}
+              />
+            )}
+
             {/* MapMarker for selected place */}
             {selectedPlace && (
-              <MapMarker position={selectedPlace.geometry.location} label={selectedPlace.name} />
-            )}
+              <MapMarker 
+              position={selectedPlace.geometry.location} 
+              label={selectedPlace.name} 
+            />
+          )}
 
             {/* Marker for user's current location */}
             {center !== null && (
-            <Marker position={center} icon={{ path: window.google.maps.SymbolPath.CIRCLE, scale: 8 }} />
-          )}
+            <Marker 
+              position={center} 
+              icon={{ path: window.google.maps.SymbolPath.CIRCLE, scale: 8 }} 
+            />
+            )}
+
             {/* Button to update center to user's location */}
-            <button onClick={handleUpdateCenter} style={{ position: 'absolute', top: 10, left: 10, zIndex: 2 }}>現在地を取得</button>
+            <button 
+              onClick={handleUpdateCenter} 
+              style={{ position: 'absolute', top: 10, left: 10, zIndex: 2 }}
+            >
+              現在地を取得
+            </button>
           </GoogleMap>
         </LoadScript>
       </div>
